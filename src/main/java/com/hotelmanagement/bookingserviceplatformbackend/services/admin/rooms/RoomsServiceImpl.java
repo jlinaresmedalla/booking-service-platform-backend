@@ -4,12 +4,14 @@ import com.hotelmanagement.bookingserviceplatformbackend.dto.RoomDto;
 import com.hotelmanagement.bookingserviceplatformbackend.dto.RoomsResponseDto;
 import com.hotelmanagement.bookingserviceplatformbackend.entity.Room;
 import com.hotelmanagement.bookingserviceplatformbackend.repository.RoomsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,4 +46,36 @@ public class RoomsServiceImpl implements RoomsService {
         return roomsResponseDto;
     }
 
+    public RoomDto getRoomById(Long id){
+        Optional<Room> optionalRoom = roomsRepository.findById(id);
+        if (optionalRoom.isPresent()){
+            return optionalRoom.get().getRoomDto();
+        }else {
+            throw new EntityNotFoundException("Room not found");
+        }
+    }
+
+    public boolean updateRoom(Long id,RoomDto roomDto){
+        Optional<Room> optionalRoom = roomsRepository.findById(id);
+        if (optionalRoom.isPresent()){
+            Room room = optionalRoom.get();
+            room.setName(roomDto.getName());
+            room.setType(roomDto.getType());
+            room.setPrice(roomDto.getPrice());
+
+            roomsRepository.save(room);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public void deleteRoom(Long id){
+        Optional<Room> optionalRoom = roomsRepository.findById(id);
+        if (optionalRoom.isPresent()){
+            roomsRepository.deleteById(id);
+        }else {
+            throw new EntityNotFoundException("Room not found");
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.hotelmanagement.bookingserviceplatformbackend.controller.admin;
 
 import com.hotelmanagement.bookingserviceplatformbackend.dto.RoomDto;
 import com.hotelmanagement.bookingserviceplatformbackend.services.admin.rooms.RoomsService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,36 @@ public class RoomsController {
     @GetMapping("/rooms/{pageNumber}")
     public ResponseEntity<?> getAllRooms(@PathVariable int pageNumber){
         return ResponseEntity.ok(roomsService.getAllRooms(pageNumber));
+    }
+
+    @GetMapping("/room/{id}")
+    public ResponseEntity<?> getRoomById(@PathVariable Long id){
+        try {
+            return ResponseEntity.ok(roomsService.getRoomById(id));
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/room/{id}")
+    public ResponseEntity<?> updateRoom(@PathVariable Long id, @RequestBody RoomDto roomDto){
+        boolean success = roomsService.updateRoom(id, roomDto);
+        if(success){
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/room/{id}")
+    public ResponseEntity<?> deleteRoom(@PathVariable Long id){
+        try {
+            roomsService.deleteRoom(id);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }
